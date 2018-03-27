@@ -1,0 +1,61 @@
+package server;
+import java.io.*;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+
+import coms.Messge;
+import coms.Utils;
+
+public class SocketUDP extends Thread {
+	/*Very simple UDP socket/server. It listens on 8000 and receives data without connection from the client.
+	 * Then it appends "This is the server:" to the mesasge and sends it back 
+	 * to the client.
+	 * 
+	 * TODO: encoding? seems fine but check?
+	 * */
+	
+	protected int port = 8000;
+    protected DatagramSocket udpsocket = null;
+    protected BufferedReader in = null;
+
+    public SocketUDP() throws IOException {
+	this("simpleudpserver");
+    }
+
+    public SocketUDP(String name) throws IOException {
+        super(name);
+        udpsocket = new DatagramSocket(port);
+        System.out.println("server name:" + super.getName());
+
+    }
+
+    public void run() {
+    	
+
+        while (true) {
+            try {
+            	System.out.println("SOKET UDPS");
+                byte[] buf = new byte[Utils.totalBytes];
+            	//receiving the packet from whoever
+                DatagramPacket inPacket = new DatagramPacket(buf, buf.length);
+                udpsocket.receive(inPacket);
+                
+                //Response - we basically just turn to a string & resend it, to show we can do end to end
+                Messge msg = new Messge(inPacket.getData());
+    			System.out.println("Msg de client:" + msg.toString());
+                buf = msg.toBytes();
+                
+                // send the response to the client at "address" and "port"
+                InetAddress address = inPacket.getAddress();
+                int port = inPacket.getPort();
+                DatagramPacket outPacket = new DatagramPacket(buf, buf.length, address, port);
+                udpsocket.send(outPacket);
+                
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+
+}

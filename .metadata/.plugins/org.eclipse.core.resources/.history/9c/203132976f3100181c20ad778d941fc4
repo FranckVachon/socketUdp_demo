@@ -1,0 +1,69 @@
+package client;
+import java.io.*;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+import coms.Messge;
+import coms.Utils;
+
+public class ClientUDP {
+	/*Il faudra redéfinir cela mieux/ailleurs mais pour fins de tests*/
+	static int userId = 1;
+	static int authorId = 2;
+	static int msgId=99;
+
+	public static void main(String[] args) throws IOException {
+
+		if (args.length != 1) {
+			System.out.println("Usage: java QuoteClient <hostname>");
+			return;
+		}
+		// get a datagram socket
+		DatagramSocket socket = new DatagramSocket();
+		InetAddress address = InetAddress.getByName(Utils.serverName);
+
+		//reading input from keyboard. kill with ctrl + c
+		while (true) {
+			byte[] buf = new byte[Utils.datagrameSizeBytes];
+			//lire l'input du clavier
+			Scanner scan = new Scanner(System.in);
+			String myLine = scan.nextLine();
+			
+			//Construire un obj message avec le string & ids etc et ensuite un byte[] pour l'envoie avec toutes ces infos
+			Messge msg = build_msg(myLine);
+			buf = msg.toBytes();
+			DatagramPacket outpacket = new DatagramPacket(buf, buf.length, address, 8000);
+
+			System.out.println("Msg sent: " + msg.toString());
+			socket.send(outpacket);
+			
+			//processus inverse
+			DatagramPacket inpacket = new DatagramPacket(new byte[Utils.datagrameSizeBytes], Utils.datagrameSizeBytes);
+			socket.receive(inpacket);
+			
+			// display response
+			msg = new Messge(inpacket.getData());
+			System.out.println("Msg return:" + msg.toString());
+			/*
+			String received = new String(inpacket.getData(), StandardCharsets.UTF_8);
+			System.out.println("Msgs received froms server: " + received);
+			System.out.println("Size bytes: " + inpacket.getLength());
+			System.out.println("");
+			*/
+		}
+		//Would normally close the socket at some point
+		//socket.close();
+	}
+	
+	
+	public static void sendToSocketUdp() {
+		
+	}
+	
+	public static Messge build_msg(String content) {
+		
+		return new Messge(userId, authorId, msgId, content);
+
+	}
+}

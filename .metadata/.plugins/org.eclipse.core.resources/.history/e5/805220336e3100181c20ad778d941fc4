@@ -1,0 +1,40 @@
+
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
+public class Utils {
+	/*Constantes utilisées par socket ET client, doivent être les mêmes*/
+	public static String serverName = "localhost";
+	public static int port = 8000;
+	
+	//Paquets structure
+	public static int messageIdBytes = 4;
+	public static int authorIdBytes = 4;
+	public static int salleIdBytes = 4;
+	public static int datagrameSizeBytes = 10000;
+	public static int totalBytes = messageIdBytes+ authorIdBytes+salleIdBytes+datagrameSizeBytes;
+
+	/*Autres choses*/
+	public static byte[] intToBytes(int numb) {
+		return ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(numb).array();
+	}
+	
+	public static int bytesToInt(byte[] by) {
+		//From SO question # 2383265
+		//  create a byte buffer and wrap the array
+		System.out.println("bytesToInt:"+by.length);
+		ByteBuffer bb = ByteBuffer.wrap(by);
+
+		//  if the file uses little endian as apposed to network
+		//  (big endian, Java's native) format,
+		//  then set the byte order of the ByteBuffer
+
+		//  read your integers using ByteBuffer's getInt().
+		//  four bytes converted into an integer!
+		return bb.getInt();
+		
+	}
+	
+	
+}
